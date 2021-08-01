@@ -14,6 +14,11 @@ import CSV from MoneyWallet to MoneyMoney
 * copy this file to your Mac
 * select this file and choose `CSV (MoneyWallet)` as file type when importing to MoneyMoney (https://moneymoney-app.com)
 
+## Data Format
+
+* if using subcategories, then `:` is interpreted as delimiter (this means that : can no longer be used in titles of categories). 
+  * Example: `Expenses:category1:Eating out` -> only `Eating out` is treated as category for import.
+
 ## Thanks
 
 * MoneyWallet App https://github.com/AndreAle94/moneywallet
