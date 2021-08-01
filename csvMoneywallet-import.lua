@@ -30,8 +30,10 @@ Importer{
 -- needs these columns in any order in the CSV file - leave empty if n/a, can have additional columns, and , as delimiter:
 -- the format that gets exported from MoneyWallet:
 -- "wallet","currency","category","datetime","money","description","event","people","place","note"
--- datetime (String) (mandatory value): must be in yyyy-MM-DD hh:mm:ss in csv
+-- datetime (String) (mandatory value): is in yyyy-MM-DD hh:mm:ss by default
 -- category (String): category name - only the displayed sub-category (i.e. if you have astructure like `assets - money1 then just `money1`). If you want to create categories quickly, then export, edit and then import a csv file using the default im/exporter of MM. You can specify hierachical categories with `- `as delimiter.
+-- if using subcategories, then `:` is interpreted as delimiter (this means that : can no longer be used in titles of categories).
+-- Example: `Expenses:category1:Eating out` -> only `Eating out` is treated as category for import.
 -- people (String): name of the sender/payee
 -- money (Number) (mandatory value): amount of transfer in numbers, decimal marker must be . (not ,)
 -- currency (String): currency
@@ -70,6 +72,15 @@ function numbercomma_to_value(n)
   return numberdot
 end
 
+function trimcategory(cat)
+  -- print("cat is: ", cat)
+  local trimmed = cat
+  if string.match(cat, '.*%:.*') then
+    trimmed = string.match(cat, '.*%:(.*)$')
+  end
+  return trimmed
+end
+
 function ReadTransactions (account)
   print("import script CSV (MoneyWallet) importing whole file to the account, reading: ", io.filename)
   print("this script requires ftcsv.lua from https://github.com/FourierTransformer/ftcsv (MIT License)")
@@ -85,20 +96,20 @@ function ReadTransactions (account)
     -- wallet,currency,category,datetime,money,description,event,people,place,note
 
     comment_full = ''
-    if line.note ~="" then
+    if line.note ~= "" then
       comment_full = comment_full .. line.note
     end
-    if line.event ~="" then
+    if line.event ~= "" then
       comment_full = comment_full .. " Event: " .. line.event
     end
-    if line.place ~="" then
+    if line.place ~= "" then
       comment_full = comment_full .. " Place: " .. line.place
     end
 
     local transaction = {
       amount = numbercomma_to_value(line.money),
       bookingDate = strToDate(line.datetime),
-      category = line.category,
+      category = trimcategory(line.category),
       comment = comment_full,
       currency = line.currency,
       name = line.people,
